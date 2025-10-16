@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Share Tech Mono', monospace;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+        
+        h1 {
+            font-size: 3em;
+            letter-spacing: 2px;
+            margin: 0 0 10px 0;
+            font-weight: normal;
+            text-transform: uppercase;
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 1.2em;
+            margin-top: 5px;
+        }
+        
+        .chat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 40px 0;
+        }
+        
+        .chat-room {
+            border: 1px solid #333;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background-color: #0a0a0a;
+        }
+        
+        .chat-room:hover {
+            border-color: #fff;
+            background-color: #111;
+            transform: translateY(-3px);
+        }
+        
+        .chat-room a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            height: 100%;
+            width: 100%;
+            font-size: 1.1em;
+        }
+        
+        .room-purpose {
+            display: block;
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 8px;
+        }
+        
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #444;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+        
+        .blinker {
+            animation: blink 1s step-start infinite;
+            color: #fff;
+        }
+        
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        
+        /* Simple terminal effect */
+        .terminal {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 0.8em;
+            color: #444;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .chat-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>the web</h1>
+            <div class="subtitle"></div>
+        </div>
+        
+        <div class="chat-grid">
+            <div class="chat-room">
+                <a href="https://search.brave.com" target="_blank">
+                    search
+                    <span class="room-purpose">(general)</span>
+                </a>
+            </div>
+            <div class="chat-room">
+                <a href="https://atomicmail.io" target="_blank">
+                    mail
+                    <span class="room-purpose">(us politics)</span>
+                </a>
+            </div>
+            <div class="chat-room">
+                <a href="https://www.bbc.com" target="_blank">
+                    news
+                    <span class="room-purpose">(us current events)</span>
+                </a>
+            </div>
+                        <div class="chat-room">
+                <a href="https://one-seven-17.github.io/home/" target="_blank">
+                    chat
+                    <span class="room-purpose">(tech)</span>
+                </a>
+            </div>
+                        <div class="chat-room">
+                <a href="https://github.com" target="_blank">
+                    code
+                    <span class="room-purpose">(physics)</span>
+                </a>
+            </div>
+            <!-- More sites can be added here in the future -->
+        </div>
+</body>
+</html>
