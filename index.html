@@ -1,162 +1,326 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-        body {
-            background-color: #000;
-            color: #fff;
-            font-family: 'Share Tech Mono', monospace;
-            margin: 0;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #333;
-        }
-        
-        h1 {
-            font-size: 3em;
-            letter-spacing: 2px;
-            margin: 0 0 10px 0;
-            font-weight: normal;
-            text-transform: uppercase;
-        }
-        
-        .subtitle {
-            color: #888;
-            font-size: 1.2em;
-            margin-top: 5px;
-        }
-        
-        .chat-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
-            margin: 40px 0;
-        }
-        
-        .chat-room {
-            border: 1px solid #333;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-            background-color: #0a0a0a;
-        }
-        
-        .chat-room:hover {
-            border-color: #fff;
-            background-color: #111;
-            transform: translateY(-3px);
-        }
-        
-        .chat-room a {
-            color: #fff;
-            text-decoration: none;
-            display: block;
-            height: 100%;
-            width: 100%;
-            font-size: 1.1em;
-        }
-        
-        .room-purpose {
-            display: block;
-            color: #888;
-            font-size: 0.9em;
-            margin-top: 8px;
-        }
-        
-        .footer {
-            margin-top: 60px;
-            text-align: center;
-            font-size: 0.9em;
-            color: #444;
-            padding-top: 20px;
-            border-top: 1px solid #333;
-        }
-        
-        .blinker {
-            animation: blink 1s step-start infinite;
-            color: #fff;
-        }
-        
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-        
-        /* Simple terminal effect */
-        .terminal {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            font-size: 0.8em;
-            color: #444;
-        }
-        
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            .chat-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 2.2em;
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini Browser</title>
+  <style>
+    :root {
+      --bg: #0f1724;
+      --panel: #0b1220;
+      --accent: #06b6d4;
+      --text: #e6eef6;
+      --muted: #9aa7b8;
+      --danger: #ff6b6b;
+      --height-bar: 56px;
+    }
+    html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071226 0%, #06111a 100%); color:var(--text); }
+    .app {
+      height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+    .bar {
+      height:var(--height-bar);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:8px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.05));
+      box-shadow: 0 2px 8px rgba(2,6,23,0.6);
+      z-index:10;
+    }
+    .controls {
+      display:flex;
+      gap:6px;
+    }
+    button {
+      background:transparent;
+      color:var(--text);
+      border:1px solid rgba(255,255,255,0.03);
+      padding:8px 10px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:14px;
+    }
+    button:active { transform:translateY(1px); }
+    button[disabled] { opacity:0.45; cursor:not-allowed; }
+    .url-input {
+      flex:1;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    input[type="text"] {
+      width:100%;
+      padding:10px 12px;
+      font-size:14px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      color:var(--text);
+      outline:none;
+    }
+    .go {
+      padding:10px 12px;
+      border-radius:10px;
+      background:linear-gradient(180deg,var(--accent), #0597ab);
+      border:none;
+      color:#022;
+      font-weight:600;
+      cursor:pointer;
+    }
+    .viewer-wrap {
+      position:relative;
+      flex:1;
+      min-height:0; /* important for flex containers with iframe */
+    }
+    iframe#viewer {
+      width:100%;
+      height:100%;
+      border:0;
+      display:block;
+    }
+    .overlay {
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(180deg, rgba(2,6,23,0.4), rgba(2,6,23,0.6));
+      color:var(--text);
+      pointer-events:none;
+      opacity:0;
+      transition:opacity .18s ease;
+    }
+    .overlay.show { opacity:1; pointer-events:auto; }
+    .message {
+      background:var(--panel);
+      padding:18px 20px;
+      border-radius:12px;
+      box-shadow:0 6px 24px rgba(2,6,23,0.6);
+      max-width:min(680px, calc(100% - 48px));
+      text-align:center;
+    }
+    .msg-title { font-weight:700; margin-bottom:8px; }
+    .msg-actions { margin-top:12px; display:flex; gap:8px; justify-content:center; }
+    a.link { color:var(--accent); text-decoration:none; }
+    .small { font-size:13px; color:var(--muted); margin-top:6px; }
+    @media (max-width:700px){
+      .bar { padding:6px; gap:6px; }
+      button { padding:8px; font-size:13px; }
+      input[type="text"] { font-size:13px; padding:9px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>the web</h1>
-            <div class="subtitle"></div>
+  <div class="app">
+    <div class="bar" role="toolbar" aria-label="URL bar">
+      <div class="controls">
+        <button id="backBtn" title="Back" disabled>◀</button>
+        <button id="forwardBtn" title="Forward" disabled>▶</button>
+        <button id="reloadBtn" title="Reload">⟳</button>
+        <button id="homeBtn" title="Home">🏠</button>
+      </div>
+
+      <div class="url-input">
+        <input id="urlInput" type="text" autocomplete="off" placeholder="Enter a URL (e.g. example.com or https://example.com)" />
+        <button id="goBtn" class="go">Go</button>
+      </div>
+
+      <div style="width:10px"></div>
+
+      <button id="openNewTabBtn" title="Open in new tab">↗</button>
+    </div>
+
+    <div class="viewer-wrap">
+      <iframe id="viewer" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
+
+      <div id="overlay" class="overlay">
+        <div class="message" id="msgBox" role="status" aria-live="polite">
+          <div class="msg-title" id="msgTitle">Loading…</div>
+          <div id="msgBody" class="small">Please wait — loading the site.</div>
+          <div class="msg-actions" id="msgActions" style="display:none;">
+            <button id="openTabFromMsg">Open in new tab</button>
+            <button id="tryAgain">Try again</button>
+          </div>
         </div>
-        
-        <div class="chat-grid">
-            <div class="chat-room">
-                <a href="https://search.brave.com" target="_blank">
-                    search
-                    <span class="room-purpose">(brave)</span>
-                </a>
-            </div>
-            <div class="chat-room">
-                <a href="https://atomicmail.io" target="_blank">
-                    mail
-                    <span class="room-purpose">(atomic mail)</span>
-                </a>
-            </div>
-            <div class="chat-room">
-                <a href="https://www.bbc.com" target="_blank">
-                    news
-                    <span class="room-purpose">(bbc)</span>
-                </a>
-            </div>
-                        <div class="chat-room">
-                <a href="https://one-seven-17.github.io/home/" target="_blank">
-                    chat
-                    <span class="room-purpose">(oneseven)</span>
-                </a>
-            </div>
-                        <div class="chat-room">
-                <a href="https://github.com" target="_blank">
-                    code
-                    <span class="room-purpose">(github)</span>
-                </a>
-            </div>
-            <!-- More sites can be added here in the future -->
-        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple single-file "browser"
+    const urlInput = document.getElementById('urlInput');
+    const goBtn = document.getElementById('goBtn');
+    const viewer = document.getElementById('viewer');
+    const overlay = document.getElementById('overlay');
+    const msgTitle = document.getElementById('msgTitle');
+    const msgBody = document.getElementById('msgBody');
+    const msgActions = document.getElementById('msgActions');
+    const openTabFromMsg = document.getElementById('openTabFromMsg');
+    const tryAgainBtn = document.getElementById('tryAgain');
+
+    const backBtn = document.getElementById('backBtn');
+    const forwardBtn = document.getElementById('forwardBtn');
+    const reloadBtn = document.getElementById('reloadBtn');
+    const homeBtn = document.getElementById('homeBtn');
+    const openNewTabBtn = document.getElementById('openNewTabBtn');
+
+    const HOME_URL = 'https://lite.duckduckgo.com/lite';
+
+    // Basic history stack
+    const historyStack = [];
+    let currentIndex = -1;
+
+    function normalizeUrl(raw) {
+      if (!raw) return '';
+      raw = raw.trim();
+      // if user typed javascript: or data:, block it
+      const forbidden = /^(javascript|data):/i;
+      if (forbidden.test(raw)) return '';
+      // if already has protocol
+      if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(raw)) return raw;
+      // if it looks like domain (with dots) or localhost or contains slash -> assume https
+      if (/^[\w.-]+(\.[\w.-]+)+(:\d+)?(\/.*)?$/.test(raw) || raw.startsWith('localhost') || raw.includes('/')) {
+        return 'https://' + raw;
+      }
+      // else fallback to https
+      return 'https://' + raw;
+    }
+
+    function setOverlay(title, body, actionable=false) {
+      msgTitle.textContent = title;
+      msgBody.textContent = body;
+      if (actionable) {
+        msgActions.style.display = 'flex';
+      } else {
+        msgActions.style.display = 'none';
+      }
+      overlay.classList.add('show');
+    }
+    function hideOverlay() {
+      overlay.classList.remove('show');
+    }
+
+    let loadTimeout = null;
+    function navigateTo(rawUrl, pushHistory=true) {
+      const url = normalizeUrl(rawUrl);
+      if (!url) {
+        setOverlay('Invalid URL', 'That URL looks invalid or is blocked for safety.', true);
+        return;
+      }
+      // update input display
+      urlInput.value = url;
+
+      // if pushing history, truncate forward history
+      if (pushHistory) {
+        if (currentIndex < historyStack.length - 1) {
+          historyStack.splice(currentIndex + 1);
+        }
+        historyStack.push(url);
+        currentIndex = historyStack.length - 1;
+        updateNavButtons();
+      }
+
+      // try load
+      setOverlay('Loading…', 'Loading the page — if a site blocks embedding this will fail and you can open it in a new tab.', false);
+      msgActions.style.display = 'none';
+
+      // Set iframe src
+      viewer.src = url;
+
+      // If onload doesn't fire in X seconds, assume blocked or failed
+      if (loadTimeout) clearTimeout(loadTimeout);
+      loadTimeout = setTimeout(() => {
+        setOverlay('Could not load page', 'The site may block being embedded (X-Frame-Options / CSP), or the network failed. You can open it directly in a new tab.', true);
+        openTabFromMsg.onclick = () => window.open(url, '_blank');
+      }, 6000); // 6s timeout for load
+
+      // Keep openTab button updated
+      openNewTabBtn.onclick = () => window.open(url, '_blank');
+    }
+
+    viewer.addEventListener('load', () => {
+      // Successful load (note: cross-origin content is fine; we can't inspect inner content)
+      if (loadTimeout) {
+        clearTimeout(loadTimeout);
+        loadTimeout = null;
+      }
+      hideOverlay();
+      // Update the displayed URL to match iframe's location if same-origin; otherwise keep the one we set.
+      try {
+        // This will throw for cross-origin; wrap in try/catch
+        const loc = viewer.contentWindow.location.href;
+        if (loc) urlInput.value = loc;
+      } catch (e) {
+        // can't access — ignore
+      }
+    });
+
+    viewer.addEventListener('error', () => {
+      // Note: iframe 'error' may not fire for X-Frame-Options; timeout above handles that.
+      setOverlay('Load error', 'An error occurred while loading the site.', true);
+    });
+
+    // UI actions
+    goBtn.addEventListener('click', () => navigateTo(urlInput.value, true));
+    urlInput.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') navigateTo(urlInput.value, true);
+      if (ev.key === 'Escape') urlInput.blur();
+    });
+
+    backBtn.addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateNavButtons();
+        navigateTo(historyStack[currentIndex], false);
+      }
+    });
+    forwardBtn.addEventListener('click', () => {
+      if (currentIndex < historyStack.length - 1) {
+        currentIndex++;
+        updateNavButtons();
+        navigateTo(historyStack[currentIndex], false);
+      }
+    });
+    reloadBtn.addEventListener('click', () => {
+      // reload current URL
+      if (currentIndex >= 0) {
+        navigateTo(historyStack[currentIndex], false);
+      } else {
+        navigateTo(urlInput.value || HOME_URL, true);
+      }
+    });
+    homeBtn.addEventListener('click', () => navigateTo(HOME_URL, true));
+    openNewTabBtn.addEventListener('click', () => {
+      const url = normalizeUrl(urlInput.value || HOME_URL);
+      window.open(url, '_blank');
+    });
+
+    tryAgainBtn.addEventListener('click', () => {
+      hideOverlay();
+      if (currentIndex >= 0) navigateTo(historyStack[currentIndex], false);
+      else navigateTo(urlInput.value || HOME_URL, true);
+    });
+
+    // helper
+    function updateNavButtons() {
+      backBtn.disabled = currentIndex <= 0;
+      forwardBtn.disabled = currentIndex >= historyStack.length - 1;
+    }
+
+    // start at home
+    navigateTo(HOME_URL, true);
+
+    // Small convenience: open link clicked in content in same iframe when possible:
+    // NOTE: Cannot reliably intercept cross-origin clicks; this is best-effort for same-origin docs.
+    window.addEventListener('message', (ev) => {
+      // reserved for future enhancements if embedding cooperating pages
+    });
+
+    // Provide informative tooltip if iframe blocked by X-Frame-Options:
+    // (We rely on the timeout above to detect failure and show the message.)
+  </script>
 </body>
 </html>
