@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mini Browser</title>
+  <title>browser</title>
   <style>
     :root {
       --bg: #0f1724;
@@ -167,7 +167,7 @@
     const homeBtn = document.getElementById('homeBtn');
     const openNewTabBtn = document.getElementById('openNewTabBtn');
 
-    const HOME_URL = 'https://search.inetol.net';
+    const HOME_URL = '<iframe src="http://127.0.0.1:8000/proxy?url=https://google.com"></iframe>';
 
     // Basic history stack
     const historyStack = [];
